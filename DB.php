@@ -26,7 +26,10 @@ class DB
    */
   public function __construct(\Slim\Slim $app, $dbname=null)
   {
-    $dsn = str_replace('@', $dbname, $app->config('dsn'));
+    $dsn = $app->config('dsn');
+    if ($dbname) {
+      $dsn = str_replace('@', $dbname, $dsn);
+    }
     if ($app->config('pdo_fetch_style')) {
       $this->pdoFetchStyle = $app->config('pdo_fetch_style');
     }
