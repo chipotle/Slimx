@@ -72,7 +72,7 @@ This will return a `PDOStatement` object.
 
 ### DB::read($query, $params)
 
-Executes the given query, as above, but returns a single value directly. If the query returns more than one value, you're only getting the first one back. (If you want more than one value, use `readSet` below or roll your own.)
+Executes the given query, as above, but returns a single row directly. If the query returns more than one row, you're only getting the first one back. (If you want more than one row, use `readSet` below or roll your own.)
 
 	$res = $db->read('SELECT * FROM mytable WHERE id = ?', 2);
 
@@ -85,7 +85,7 @@ Executes the given query, as above, but returns the result values directly.
 
 	$res = $db->readset('SELECT id, name, other_id FROM mytable');
 
-* For a *single-column result,* you get a (non-associative) array.
+* For a *single-column result,* you get an array.
 * For a *multiple-column result,* you'll get an array of objects (or whatever you've requested if you've changed the fetch style).
 
 ### DB::readHash($query, $params)
@@ -129,4 +129,14 @@ In the first form, it will retrieve the record from `mytable` whose primary key 
 
 In both cases, you can specify an optional third argument giving the primary key name if that name isn't `id`.
 
-Note that the function differentiates between the first and second forms by testing to see whether the second argument is a string. So, you can't use the first form of this function if you have a table whose primary keys are strings. (I've never seen such a table, but strange things are out there.)
+Note that the function differentiates between the first and second forms by testing to see whether the second argument is a string. So, you can't use the first form of this function if you have a table whose primary keys are strings (weirdo).
+
+The `get` and `save` functions are meant to function together to provide easy object-based CRUD, er, crud:
+
+	$post = $db->get('post', $id);
+	$post->title = 'New Title';
+	$post->body = 'Lorem Ipsum';
+	$post->user_id = $user->id;
+	$db->update('post', $post);
+
+It wouldn't be too difficult to build this into an actual ORM, although rather than going too far down that path you're probably better off using an existing, robust ORM like [Doctrine](http://www.doctrine-project.org/).

@@ -43,6 +43,8 @@ class DB
 
   /**
    * Return the PDO object, for direct manipulation if necessary
+   * 
+   * @return PDO object
    */
   public function pdo()
   {
@@ -51,8 +53,8 @@ class DB
 
   /**
    * Execute an SQL query. Generally used for updates/inserts, as the
-   * read/readSet methods below are more convenient for results, but
-   * it returns a PDOStatement object.
+   * read/readSet methods below are more convenient for results; it
+   * returns a PDOStatement object.
    *
    * @param string $query 
    * @param mixed $params Parameter array or single string
@@ -222,6 +224,8 @@ class DB
    * 
    * @param string $table table name
    * @param mixed $where key value or WHERE clause
+   * @param string $key column name of primary key (default "id")
+   * @return PDOStatement object
    */
   public function get($table, $where, $key='id')
   {
