@@ -1,0 +1,9 @@
+{
+    "name": "chipotle/slimx",
+    "description": "Lightweight templating and PDO data access for Slim",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.0",
+        "slim/slim": "2.*"
+    }
+}
