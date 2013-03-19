@@ -1,9 +1,20 @@
 {
     "name": "chipotle/slimx",
+    "type": "library",
     "description": "Lightweight templating and PDO data access for Slim",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Watts Martin",
+            "email": "layotl@gmail.com",
+            "homepage": "http://ranea.org/"
+        }
+    ],
     "require": {
         "php": ">=5.3.0",
         "slim/slim": "2.*"
+    },
+    "autoload": {
+        "psr-0": { "Slimx": "." }
     }
 }
