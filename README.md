@@ -10,6 +10,14 @@ Actually starting a project in Slim, though, showed me two things that I missed 
 
 This class extends `\Slim\View` to have two extra concepts: *layouts* and *the base tag.*
 
+### Usage
+
+Simply instantiate the Slim application object with Slimx set as a custom view provider. The API is the same as Slim's native view.
+
+	$app = new \Slim\Slim([
+		'view' => new \Slimx\View();
+	]);
+
 ### Layouts
 
 This is a simple version of template inheritance. A template's layout is just a "frame" in which the content is placed, appropriately enough in the variable `$content`. A layout might look like this:
@@ -31,7 +39,17 @@ You can specify a default layout file for a site by passing it as an argument to
 
 	new \Slimx\View('_mylayout.php');
 
-By default, the file will be named `_layout.php`. Layouts are stored in the template directory you've configured (`templates` by default). Layouts will have access to all the variables the template does.
+With no argument, the file will take the default name of `_layout.php`. You can also pass `false` as the layout argument, and there will be *no* default layout set.
+
+Layouts are stored in the template directory you've configured (`templates` by default). Layouts will have access to all the variables the template does.
+
+An individual view can override the application-wide layout by setting the special key `_layout` in its data array to the name of the new template:
+
+	$app->render('page.php', [
+		'_layout' => 'other_layout.php'
+	]);
+
+As with the application-wide layout, if you set a view's `_layout` key to `false` it will have no layout.
 
 ### Base variable
 
