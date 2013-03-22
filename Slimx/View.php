@@ -20,7 +20,7 @@ class View extends \Slim\View
    */
   public function __construct($layout=null)
   {
-    if ($layout == null) $layout = '_layout.php';
+    if ($layout === null) $layout = '_layout.php';
     $this->layout = $layout;
   }
 
