@@ -20,12 +20,12 @@ class DB
 
   /**
    * Constructor. This sets up the PDO object.
-   * 
-   * @param object $app Slim application object
+   *
    * @param string $dbname database name to connect to (optional)
    */
-  public function __construct(\Slim\Slim $app, $dbname=null)
+  public function __construct($dbname=null)
   {
+    $app = Slim::getInstance();
     $dsn = $app->config('dsn');
     if ($dbname) {
       $dsn = str_replace('@', $dbname, $dsn);
