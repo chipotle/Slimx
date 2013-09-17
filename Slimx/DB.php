@@ -239,3 +239,11 @@ class DB
     return $this->read($query, $where);
   }
 }
+  /**
+   * Close the connection.
+   */
+  public function close()
+  {
+    $this->pdo = null;
+  }
+
