@@ -1,9 +1,12 @@
-<?php
+<?php namespace Slimx;
+
+use Slim\Slim;
+
 /**
  * Very lightweight wrapper around PDO
- * 
+ *
  * This expects configuration keys in the Slim application object:
- * 
+ *
  *    dsn              DSN for PDO connection. Use @ as a placeholder for
  *                     dbname (i.e., "mysql:host=localhost;dbname=@")
  *    db_user          username for DB access (if needed)
@@ -11,8 +14,6 @@
  *    pdo_fetch_style  optional return style for PDO records. Default is
  *                     PDO::FETCH_OBJ.
  */
-namespace Slimx;
-
 class DB
 {
   private $pdo;
@@ -43,7 +44,7 @@ class DB
 
   /**
    * Return the PDO object, for direct manipulation if necessary
-   * 
+   *
    * @return PDO object
    */
   public function pdo()
@@ -52,13 +53,16 @@ class DB
   }
 
   /**
-   * Execute an SQL query. Generally used for updates/inserts, as the
-   * read/readSet methods below are more convenient for results; it
-   * returns a PDOStatement object.
+   * Execute a query and return result set
    *
-   * @param string $query 
-   * @param mixed $params Parameter array or single string
-   * @return PDOStatement object
+   * To use bound parameters, pass them as a second parameter. If you have
+   * only one parameter it may be passed directly, otherwise use an array.
+   * Named parameters must always be an associative array. This is usually
+   * a less useful function than read, readSet and readHash.
+   *
+   * @param string $query query statement
+   * @param mixed $params query parameters (single or array)
+   * @return PDOStatement
    */
   public function query($query, $params=null)
   {
@@ -69,10 +73,26 @@ class DB
   }
 
   /**
-   * Return a single-record result from an SQL query. This will always
-   * return a string for a single-column result; otherwise it will return
-   * an array or object based on pdoFetchStyle.
-   * 
+   * Execute a query and return count of affected rows
+   *
+   * @param string $query query statement
+   * @param mixed $params query parameters (single or array)
+   * @return int affected rows
+   */
+  public function exec($query, $params=null)
+  {
+    if ($params && !is_array($params)) $params = array($params);
+    $sth = $this->pdo->prepare($query);
+    $sth->execute($params);
+    return $sth->rowCount();
+  }
+
+  /**
+   * Read a single record with a query
+   *
+   * This will return either an object with the record fields, or if the
+   * query returns a single column, a single variable.
+   *
    * @param string $query
    * @param mixed $params Parameter array or single string
    * @return mixed|array returned records (or false)
@@ -88,10 +108,11 @@ class DB
   }
 
   /**
-   * Return a multiple-record result from an SQL query. This will always
-   * return an array for a single-column result; otherwise it will return
-   * a value based on pdoFetchStyle.
-   * 
+   * Read a set of records with a query
+   *
+   * This behaves as the read() function, but will return an array of
+   * record objects or an array of values for a single column query.
+   *
    * @param string $query
    * @param mixed $params Parameter array or single string
    * @return object|array returned records (or false)
@@ -107,10 +128,12 @@ class DB
   }
 
   /**
-   * Return a hash (associative array) from an SQL query that returns two
-   * columns -- the first column will be the key, and the second will be the
-   * value. Throws a LengthException if the column count returned is not 2.
-   * 
+   * Read a set of key/value hashes with a query
+   *
+   * This expects a query that returns two and only two columns. It will
+   * return a hash-style array in which the first column returned is the
+   * key and the second is the value.
+   *
    * @param string $query
    * @param mixed $params Parameter array or single string
    * @return array returned records (or false)
@@ -127,8 +150,10 @@ class DB
   }
 
   /**
-   * Save a record to a table. This will call insert() or update() as appropriate.
-   * 
+   * Save a record to a table.
+   *
+   * This calls insert() or update() as appropriate.
+   *
    * @param string $table table name
    * @param array|object $data column names and values
    * @param string $key column name of primary key (default "id")
@@ -150,7 +175,7 @@ class DB
 
   /**
    * Insert a record into a table
-   * 
+   *
    * @param string $table table name
    * @param array|object $data column names and values
    * @return PDOStatement object
@@ -166,7 +191,7 @@ class DB
 
   /**
    * Update a record in a table
-   * 
+   *
    * @param string $table table name
    * @param array|object $data column names and values
    * @param string $key column name of primary key (default "id")
@@ -191,7 +216,7 @@ class DB
 
   /**
    * Delete a record in a table
-   * 
+   *
    * @param string $table table name
    * @param mixed $id key value to delete
    * @param string $key column name of primary key (default "id")
@@ -205,40 +230,36 @@ class DB
 
   /**
    * Read one or more records from a table
-   * 
+   *
    * This returns all columns in one or more rows. It can be called in one
    * of two ways:
-   * 
-   *    $db->get('mytable', 2, 'id');
-   *    $db->get('mytable', 'id >= 100 AND id <= 200');
-   * 
-   * In the first form, the third parameter defaults to 'id', so the above
-   * could simply be:
-   * 
+   *
    *    $db->get('mytable', 2);
-   * 
+   *    $db->get('mytable', 2, 'id');
+   *
+   *    $db->get('mytable', 'id >= 100 AND id <= 200');
+   *    $db->get('mytable', 'id >= ? AND id <= ?', array($x, $y));
+   *
    * Note that the first form *only* works with key values that are numeric;
    * if the second parameter is a string, it is assumed to be a condition.
-   * Conditions are passed directly to SQL, without parameter escaping; if
-   * you need escaping, use the query() function.
-   * 
+   *
    * @param string $table table name
    * @param mixed $where key value or WHERE clause
-   * @param string $key column name of primary key (default "id")
+   * @param mixed $key lookup column (default "id") or parameter array
    * @return PDOStatement object
    */
-  public function get($table, $where, $key='id')
+  public function get($table, $where, $key=null)
   {
     $query = "SELECT * FROM $table WHERE ";
     if (is_string($where)) {
       $query .= $where;
-      $params = null;
-      return $this->readSet($query);
+      return $this->readSet($query, $params);
     }
+    $key = $key ?: 'id';
     $query .= "$key = ?";
     return $this->read($query, $where);
   }
-}
+
   /**
    * Close the connection.
    */
@@ -247,3 +268,4 @@ class DB
     $this->pdo = null;
   }
 
+}
