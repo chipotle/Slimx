@@ -6,6 +6,19 @@ A couple years ago I started my own PHP microframework, Flagpole; it became usab
 
 Actually starting a project in Slim, though, showed me two things that I missed from Flagpole: a lightweight database access wrapper and a "native PHP" templating system that at *least* supported the concept of layouts like early Rails apps did. It appears a lot of people using Slim are using [Twig](http://twig.sensiolabs.org) for templating; I think Twig is a terrific template system, but sometimes you don't need that level of abstraction, or you're working with co-workers who only know pure PHP. And often you don't need an ORM, but you'd still like to have some convenience wrappers for database access.
 
+## Installation
+
+The best way to install SlimX is through Composer. In your `composer.json` file:
+
+	{
+		"require": {
+			"slim/slim": "2.*",
+			"chipotle/slimx": "dev-master"
+		}
+	}
+
+If you're doing manual installation, SlimX follows the [PSR-0 standard](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+
 ## \Slimx\View
 
 This class extends `\Slim\View` to have two extra concepts: *layouts* and *the base tag.*
@@ -70,9 +83,9 @@ This expects you to have set up to four keys in your Slim application config spa
 
 ### Constructor
 
-The required first argument is your Slim application object. The optional second argument is a database name for the PDO object to instantiate.
+The optional first argument is a database name for the PDO object to instantiate, if you're using the "@" placeholder trick described above. If you're just using one database you don't need it.
 
-	$db = new \Slimx\DB($app, 'mydb');
+	$db = new \Slimx\DB();
 
 ### DB::pdo()
 
@@ -87,6 +100,10 @@ Executes SQL query, with an optional parameter *or* array.
 If you only need to pass one parameter, it doesn't need to be an array; multiple parameters do need to be an array. Use an associative array for named parameters (`array(':foo' => 'banana', ':bar' => 'apricot')`).
 
 This will return a `PDOStatement` object.
+
+### DB:exec($query, $params)
+
+This is essentially the same as `DB::query` but rather than returning a `PDOStatement` object, it returns the count of affected rows. In many cases this is going to be more useful feedback.
 
 ### DB::read($query, $params)
 
@@ -143,13 +160,16 @@ This is a convenience-maybe function that will return all columns in one or more
 	$db->get('mytable', 2);
 	$db->get('mytable', 'id >= 100 AND id <= 200');
 
-In the first form, it will retrieve the record from `mytable` whose primary key is 2, and return it as an object (or whatever your PDO fetch style is set to). In the second form, it will retrieve all the records from `mytable` matching that WHERE clause and return an array of objects (or whatevers).
+In the first form, it will retrieve the record from `mytable` whose `id` column is 2, and return it as an object (or whatever your PDO fetch style is set to). In the second form, it will retrieve all the records from `mytable` matching that WHERE clause and return an array of objects (or whatevers).
 
-In both cases, you can specify an optional third argument giving the primary key name if that name isn't `id`.
+In both cases, you can specify an optional third argument. In the first case, the third argument is the name of the column to look up if you don't want it to be `id`; in the second case, the third argument is a parameter array, similar to the various read functions.
+
+	$db->get('mytable', 2, 'id');
+	$db->get('mytable', 'id >= ? AND id <= ?', array($x, $y));
 
 Note that the function differentiates between the first and second forms by testing to see whether the second argument is a string. So, you can't use the first form of this function if you have a table whose primary keys are strings (weirdo).
 
-The `get` and `save` functions are meant to function together to provide easy object-based CRUD, er, crud:
+The `get` and `save` functions are meant to function together for minimalist CRUD functionality:
 
 	$post = $db->get('post', $id);
 	$post->title = 'New Title';
@@ -157,4 +177,8 @@ The `get` and `save` functions are meant to function together to provide easy ob
 	$post->user_id = $user->id;
 	$db->update('post', $post);
 
-It wouldn't be too difficult to build this into an actual ORM, although rather than going too far down that path you're probably better off using an existing, robust ORM like [Doctrine](http://www.doctrine-project.org/).
+If you need an actual ORM, though, you're almost certainly better off using an existing, robust ORM like [Doctrine](http://www.doctrine-project.org/).
+
+## PHPUnit Tests
+
+Incomplete as of this writing, and only for the DB class. Fire off with `phpunit test/DBTest.php`.
