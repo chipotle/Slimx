@@ -251,7 +251,7 @@ class DB
     $query = "SELECT * FROM $table WHERE ";
     if (is_string($where)) {
       $query .= $where;
-      return $this->readSet($query, $params);
+      return $this->readSet($query, $key);
     }
     $key = $key ?: 'id';
     $query .= "$key = ?";
