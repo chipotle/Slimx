@@ -178,7 +178,7 @@ class DB
    *
    * @param string $table table name
    * @param array|object $data column names and values
-   * @return PDOStatement object
+   * @return mixed ID of last inserted row/sequence
    */
   public function insert($table, $data)
   {
@@ -186,7 +186,8 @@ class DB
     $columns = implode(', ', array_keys($data));
     $values = implode(', ', array_fill(0, count($data), '?'));
     $query = "INSERT INTO $table ($columns) VALUES ($values)";
-    return $this->query($query, array_values($data));
+    $this->query($query, array_values($data));
+    return $this->pdo->lastInsertId();
   }
 
   /**
@@ -195,7 +196,7 @@ class DB
    * @param string $table table name
    * @param array|object $data column names and values
    * @param string $key column name of primary key (default "id")
-   * @return PDOStatement object
+   * @return int count of records affected
    */
   public function update($table, $data, $key='id')
   {
@@ -211,7 +212,7 @@ class DB
     $query = "UPDATE $table SET $setq WHERE $key = ?";
     $params = array_values($data);
     $params[] = $data[$key];
-    return $this->query($query, $params);
+    return $this->exec($query, $params);
   }
 
   /**
