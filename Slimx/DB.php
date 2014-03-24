@@ -163,14 +163,9 @@ class DB
   {
     $data = (array)$data;
     if (!isset($data[$key])) {
-      throw \InvalidArgumentException("DB::save() called with data missing primary key ($key)");
+      return $this->insert($table, $data);
     }
-    if ($this->read("SELECT $key FROM $table WHERE $key = ?", array($data[$key]))) {
-      $this->update($table, $data, $key);
-    }
-    else {
-      $this->insert($table, $data);
-    }
+    return $this->update($table, $data, $key);
   }
 
   /**
