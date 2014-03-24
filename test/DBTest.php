@@ -22,6 +22,12 @@ class DBTest extends PHPUnit_Framework_TestCase
 		}
 	}
 
+	public function testPdo()
+	{
+		$pdo = $this->db->pdo();
+		$this->assertInstanceOf('PDO', $pdo);
+	}
+
 	public function testQuery()
 	{
 		$sth = $this->db->query('UPDATE box set name = "foo" WHERE id = 1');
@@ -40,12 +46,77 @@ class DBTest extends PHPUnit_Framework_TestCase
 	}
 
 	public function testRead()
-	{}
+	{
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 1);
+		$return = (object)['id' => 1, 'name' => 'bob', 'fiddlybit' =>
+			'banana', 'fiddlynum' => 42];
+		$this->assertEquals($row, $return);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 99);
+		$this->assertEquals($row, false);
+	}
 
 	public function testReadSet()
-	{}
+	{
+		$rows = $this->db->readSet('SELECT * FROM box');
+		$return = [
+			(object)['id' => 1, 'name' => 'bob', 'fiddlybit' =>
+				'banana', 'fiddlynum' => 42],
+			(object)['id' => 2, 'name' => 'agatha', 'fiddlybit' =>
+				'foobar', 'fiddlynum' => 99],
+			(object)['id' => 3, 'name' => 'coyote', 'fiddlybit' =>
+				'nota bene', 'fiddlynum' => 1],
+		];
+		$this->assertEquals($rows, $return);
+
+		$rows = $this->db->readSet('SELECT * FROM box WHERE id > 9');
+		$return = [];
+		$this->assertEquals($rows, $return);
+	}
 
 	public function testReadHash()
-	{}
+	{
+		$rows = $this->db->readHash('SELECT id, name FROM box');
+		$return = [1 => 'bob', 2 => 'agatha', 3 => 'coyote'];
+		$this->assertEquals($rows, $return);
+	}
+
+	/**
+	 * @expectedException LengthException
+	 * @expectedExceptionMessage DB::readHash() expects 2 columns returned from query
+	 */
+	public function testReadHashException()
+	{
+		$rows = $this->db->readHash('SELECT id, name, fiddlybit FROM box');
+	}
+
+	public function testInsert()
+	{
+		$data = ['name' => 'georgia', 'fiddlybit' => 'kumquat',
+			'fiddlynum' => 78];
+		$id = $this->db->insert('box', $data);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', $id);
+		$this->assertEquals($row->name, 'georgia');
+	}
+
+	public function testUpdate()
+	{
+		$data = ['name' => 'georgia', 'fiddlybit' => 'kumquat',
+			'fiddlynum' => 78, 'id' => 2];
+		$count = $this->db->update('box', $data);
+		$this->assertEquals($count, 1);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 2);
+		$this->assertEquals($row->name, 'georgia');
+	}
+
+	/**
+	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage DB::update() called with data missing primary key (id)
+	 */
+	public function testUpdateException()
+	{
+		$data = ['name' => 'georgia', 'fiddlybit' => 'kumquat',
+			'fiddlynum' => 78];
+		$count = $this->db->update('box', $data);
+	}
 
 }
