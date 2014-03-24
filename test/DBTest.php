@@ -22,9 +22,9 @@ class DBTest extends PHPUnit_Framework_TestCase
 		}
 	}
 
-	public function testPdo()
+	public function testGetPdo()
 	{
-		$pdo = $this->db->pdo();
+		$pdo = $this->db->getPdo();
 		$this->assertInstanceOf('PDO', $pdo);
 	}
 
@@ -52,7 +52,7 @@ class DBTest extends PHPUnit_Framework_TestCase
 			'banana', 'fiddlynum' => 42];
 		$this->assertEquals($row, $return);
 		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 99);
-		$this->assertEquals($row, false);
+		$this->assertFalse($row);
 	}
 
 	public function testReadSet()
@@ -133,6 +133,39 @@ class DBTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($count, 1);
 		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 2);
 		$this->assertEquals($row->name, 'hazel');
+	}
+
+	public function testDelete()
+	{
+		$count = $this->db->delete('box', 2);
+		$this->assertEquals($count, 1);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 2);
+		$this->assertFalse($row);
+	}
+
+	public function testGet()
+	{
+		$get = $this->db->get('box', 1);
+		$return = (object)['id' => 1, 'name' => 'bob', 'fiddlybit' =>
+			'banana', 'fiddlynum' => 42];
+		$this->assertEquals($get, $return);
+
+		$get = $this->db->get('box', 'id > 1');
+		$return = [
+			(object)['id' => 2, 'name' => 'agatha', 'fiddlybit' =>
+				'foobar', 'fiddlynum' => 99],
+			(object)['id' => 3, 'name' => 'coyote', 'fiddlybit' =>
+				'nota bene', 'fiddlynum' => 1],
+		];
+		$this->assertEquals($get, $return);
+		$get = $this->db->get('box', 'id >= ?', 2);
+		$this->assertEquals($get, $return);
+	}
+
+	public function testClose()
+	{
+		$this->db->close();
+		$this->assertNull($this->db->getPdo());
 	}
 
 }
