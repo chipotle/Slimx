@@ -47,7 +47,7 @@ class DB
    *
    * @return PDO object
    */
-  public function pdo()
+  public function getPdo()
   {
     return $this->pdo;
   }
