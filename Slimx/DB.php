@@ -242,7 +242,9 @@ class DB
    * @param string $table table name
    * @param mixed $where key value or WHERE clause
    * @param mixed $key lookup column (default "id") or parameter array
-   * @return PDOStatement object
+   * @see read()
+   * @see readSet()
+   * @return mixed
    */
   public function get($table, $where, $key=null)
   {
