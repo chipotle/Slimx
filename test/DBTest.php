@@ -119,4 +119,20 @@ class DBTest extends PHPUnit_Framework_TestCase
 		$count = $this->db->update('box', $data);
 	}
 
+	public function testSave()
+	{
+		$data = ['name' => 'georgia', 'fiddlybit' => 'kumquat',
+			'fiddlynum' => 78];
+		$id = $this->db->save('box', $data);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', $id);
+		$this->assertEquals($row->name, 'georgia');
+
+		$data = ['name' => 'hazel', 'fiddlybit' => 'rutabaga',
+			'fiddlynum' => 444, 'id' => 2];
+		$count = $this->db->save('box', $data);
+		$this->assertEquals($count, 1);
+		$row = $this->db->read('SELECT * FROM box WHERE id = ?', 2);
+		$this->assertEquals($row->name, 'hazel');
+	}
+
 }
