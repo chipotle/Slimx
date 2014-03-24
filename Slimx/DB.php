@@ -201,7 +201,7 @@ class DB
   {
     $data = (array)$data;
     if (!isset($data[$key])) {
-      throw \InvalidArgumentException("DB::update() called with data missing primary key ($key)");
+      throw new \InvalidArgumentException("DB::update() called with data missing primary key ($key)");
     }
     $set = array();
     foreach (array_keys($data) as $col) {
