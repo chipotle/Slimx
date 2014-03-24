@@ -87,7 +87,7 @@ The optional first argument is a database name for the PDO object to instantiate
 
 	$db = new \Slimx\DB();
 
-### DB::pdo()
+### DB::getPdo()
 
 Returns the PDO object itself, if you need it.
 
@@ -181,4 +181,5 @@ If you need an actual ORM, though, you're almost certainly better off using an e
 
 ## PHPUnit Tests
 
-Incomplete as of this writing, and only for the DB class. Fire off with `phpunit test/DBTest.php`.
+These are (fairly) complete for the DB class, but not implemented yet for the View class.
+
