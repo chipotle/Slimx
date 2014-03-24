@@ -216,12 +216,12 @@ class DB
    * @param string $table table name
    * @param mixed $id key value to delete
    * @param string $key column name of primary key (default "id")
-   * @return PDOStatement object
+   * @return int count of affected rows
    */
   public function delete($table, $id, $key='id')
   {
     $query = "DELETE FROM $table WHERE $key = ?";
-    return $this->query($query, $id);
+    return $this->exec($query, $id);
   }
 
   /**
