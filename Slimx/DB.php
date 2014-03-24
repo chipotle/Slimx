@@ -115,12 +115,12 @@ class DB
    *
    * @param string $query
    * @param mixed $params Parameter array or single string
-   * @return object|array returned records (or false)
+   * @return object|array returned records
    */
   public function readSet($query, $params=null)
   {
     $sth = $this->query($query, $params);
-    if (!$sth) return false;
+    if (!$sth) return array();
     if ($sth->columnCount() > 1) {
       return $sth->fetchAll($this->pdoFetchStyle);
     }
@@ -136,13 +136,13 @@ class DB
    *
    * @param string $query
    * @param mixed $params Parameter array or single string
-   * @return array returned records (or false)
+   * @return array returned records
    * @throws LengthException
    */
   public function readHash($query, $params=null)
   {
     $sth = $this->query($query, $params);
-    if (!$sth) return false;
+    if (!$sth) return array();
     if ($sth->columnCount() != 2) {
       throw new \LengthException('DB::readHash() expects 2 columns returned from query');
     }
