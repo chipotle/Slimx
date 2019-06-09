@@ -20,8 +20,11 @@ class View extends \Slim\View
    */
   public function __construct($layout=null)
   {
-    if ($layout === null) $layout = '_layout.php';
+    if ($layout === null) {
+      $layout = '_layout.php';
+    }
     $this->layout = $layout;
+    parent::__construct();
   }
 
   /**
@@ -30,18 +33,25 @@ class View extends \Slim\View
    * disable layout.
    * 
    * @param string $template template name
+   * @param array $data additional data to be passed to the template
    * @return string rendered template
    */
-  public function render($template)
+  public function render($template, $data = null)
   {
     $env = \Slim\Environment::getInstance();
     $this->setData('_base', $env['SCRIPT_NAME']);
-    $data = $this->getData();
-    if (isset($data['_layout'])) $layout = $data['_layout'];
-    else $layout = $this->layout;
+    
+    $data = array_merge($this->data->all(), (array)$data);
+    $this->setData($data);
+    
+    if (isset($data['_layout'])) {
+      $layout = $data['_layout'];
+    } else {
+      $layout = $this->layout;
+    }
+      
     $content = parent::render($template);
     if ($layout !== false) {
-      $this->setData($data);
       $this->setData('content', $content);
       $content = parent::render($layout);
     }
