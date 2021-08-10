@@ -1,5 +1,7 @@
 # SlimX - Extensions for Slim
 
+**Note that SlimX is no longer developed or supported, and probably isn't useful with current versions of Slim.** You're welcome to try to adapt it for your own purposes, though, consistent with the MIT license.
+
 This is a *very* small set of extensions for the [Slim Framework](http://www.slimframework.com), a Sinatra-like "microframework" for PHP.
 
 A couple years ago I started my own PHP microframework, Flagpole; it became usable, but never really advanced much, and I shelved it when it became clear there were other better projects of a similar nature like Slim.
@@ -167,7 +169,7 @@ In both cases, you can specify an optional third argument. In the first case, th
 	$db->get('mytable', 2, 'id');
 	$db->get('mytable', 'id >= ? AND id <= ?', array($x, $y));
 
-Note that the function differentiates between the first and second forms by testing to see whether the second argument is a string. So, you can't use the first form of this function if you have a table whose primary keys are strings (weirdo).
+Note that the function differentiates between the first and second forms by testing to see whether the second argument is a string. So, you can't use the first form of this function if you have a table whose primary keys are strings.
 
 The `get` and `save` functions are meant to function together for minimalist CRUD functionality:
 
